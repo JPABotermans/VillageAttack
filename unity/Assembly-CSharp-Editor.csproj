@@ -79,6 +79,7 @@
     <Compile Include="Assets\Scripts\Editor\Tests\Algorithms\Triangulation\DelaunayTest.cs" />
     <Compile Include="Assets\Scripts\Editor\Tests\Algorithms\Triangulation\TriangulatorTest.cs" />
     <Compile Include="Assets\Scripts\Editor\Tests\DataStructures\BST\AATreeTest.cs" />
+    <Compile Include="Assets\Scripts\Editor\Tests\DataStructures\BST\LineSegmentAATreeTest.cs" />
     <Compile Include="Assets\Scripts\Editor\Tests\DataStructures\Queue\BinaryHeapTest.cs" />
     <Compile Include="Assets\Scripts\Editor\Tests\DataStructures\VisibilityGraph\VisibilityGraphTest.cs" />
     <Compile Include="Assets\Scripts\Editor\Tests\Geometry\Core\BoundingBoxComputerTest.cs" />
