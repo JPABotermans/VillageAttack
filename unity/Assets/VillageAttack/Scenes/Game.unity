@@ -481,6 +481,11 @@ Prefab:
       propertyPath: m_TagString
       value: Player
       objectReference: {fileID: 0}
+    - target: {fileID: 212255253985723266, guid: 1192e8544840547dbaf639913c5044f2,
+        type: 2}
+      propertyPath: m_SortingOrder
+      value: -1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1192e8544840547dbaf639913c5044f2, type: 2}
   m_IsPrefabAsset: 0
@@ -489,6 +494,48 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 1443537979508464, guid: 1192e8544840547dbaf639913c5044f2,
     type: 2}
   m_PrefabInternal: {fileID: 317336000}
+--- !u!23 &331954451
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 331954450}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RenderingLayerMask: 4294967295
+  m_Materials:
+  - {fileID: 0}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 331954456}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+--- !u!33 &331954452
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 331954450}
+  m_Mesh: {fileID: 10210, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!50 &331954453
 Rigidbody2D:
   serializedVersion: 4
@@ -534,6 +581,22 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.7885008, y: 2.3765345}
   m_EdgeRadius: 0
+--- !u!4 &331954456 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4521087359880712, guid: 1192e8544840547dbaf639913c5044f2,
+    type: 2}
+  m_PrefabInternal: {fileID: 317336000}
+--- !u!114 &331954457
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 331954450}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dff2d4cdead814e459ecb78740ac07db, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &542574958
 Prefab:
   m_ObjectHideFlags: 0
@@ -1319,6 +1382,7 @@ MonoBehaviour:
   - {fileID: 1443464152485610, guid: e9eb1fded4fba4cfe892a8b9f62008b5, type: 2}
   - {fileID: 1844222413182502, guid: a2588baa687ff45e1b6ac4c8261887d1, type: 2}
   - {fileID: 1002211054766262, guid: 66c2cf81185ae4e53a25f56b5f03fda8, type: 2}
+  mountains: []
 --- !u!4 &1881385355
 Transform:
   m_ObjectHideFlags: 0

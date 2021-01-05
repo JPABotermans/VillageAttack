@@ -1,7 +1,9 @@
-﻿using System.Collections;
+﻿using General.Model;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Util.Geometry.Graph;
+using Util.Geometry.Polygon;
 
 public class MoveArmy : MonoBehaviour {
 
@@ -12,11 +14,22 @@ public class MoveArmy : MonoBehaviour {
 	private Material m_LineMaterial;
 	public List<Vertex> path = new List<Vertex>();
 	private static float epsilon = 0.5f;
+	private Polygon2DMesh myMesh;
+	public Polygon2D myPolygon = new Polygon2D();
 
 	// Use this for initialization
 	void Start () {
 		_body = GetComponent<Rigidbody2D>();
 		_box = GetComponent<BoxCollider2D>();
+
+		//initialize the polygon and its mesh
+		Polygon2D polygon = new Polygon2D();
+		polygon.AddVertex(new Vector2(-1, -1));
+		polygon.AddVertex(new Vector2(0, 2));
+		polygon.AddVertex(new Vector2(1, -1));
+		myMesh = gameObject.GetComponent<Polygon2DMesh>();
+		myMesh.Polygon = polygon;
+		myPolygon = polygon;
 	}
 
 	void Awake()
@@ -82,16 +95,8 @@ public class MoveArmy : MonoBehaviour {
 		GL.Vertex(_body.transform.position);
 		foreach (Vertex v in path)
         {
-			Debug.Log("Drawing line");
 			GL.Vertex(new Vector3(v.Pos.x, v.Pos.y, 0));
 		}
 		GL.End();
     }
-	// void OnCollisionEnter2D(Collision2D col) {
-	// 	if (col.collider.name =="Mountain"){
-	// 		Debug.Log("You hit the mountain");
-	// 	} else if (col.collider.name == "Village"){
-	// 		Debug.Log("You hit the village");
-	// 	}
-	// }
 }
