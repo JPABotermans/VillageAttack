@@ -85,6 +85,9 @@ public class SceneController : MonoBehaviour {
 			c.AddVertex(new Vector2D(3 + worldPosition[0], worldPosition[1]));
 			// Merge the minkowski sum of the new contour with the remaining contours
 			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+
+			_mountain = Instantiate(MountainPrefabs[this._current_prefab]) as GameObject;
+			_mountain.transform.position = new Vector3(worldPosition[0], worldPosition[1], worldPosition[2]);
 		}
 	}
 	private void MergeContours(ContourPolygon newContour)
