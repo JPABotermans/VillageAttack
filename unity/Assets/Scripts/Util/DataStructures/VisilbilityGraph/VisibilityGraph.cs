@@ -14,7 +14,7 @@
     
     public class VisibilityGraph
     {
-        private LinkedList<Vertex> m_vertices;
+        public LinkedList<Vertex> m_vertices;
         private LinkedList<Polygon2D> m_polygons;
         private LinkedList<Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?>> m_vertex_association_data;
         public AdjacencyListGraph g { get; private set; }

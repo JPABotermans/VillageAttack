@@ -11,16 +11,24 @@ using UnityEngine.Assertions;
 using Util.Geometry;
 using System.Linq;
 using Util.Algorithms.Polygon;
+using Util.VisibilityGraph;
+using Util.Geometry.Graph;
 
 public class SceneController : MonoBehaviour {
 	[SerializeField] public GameObject[] MountainPrefabs;
 	[SerializeField] public GameObject[] buttons;
+
+	[SerializeField] public GameObject village;
 	private GameObject _mountain;
 	private int _current_prefab = 1;
 	public List<PolyMountain> wd = new List<PolyMountain>();
 	private ContourPolygon contourPoly = new ContourPolygon();
 	private Material m_LineMaterial;
 	public Color highlightcolor = Color.cyan;
+
+	private bool contains_visibility_graph = false;
+
+	public VisibilityGraph visibility_graph;
 
 	// Use this for initialization
 	void Start () {
@@ -37,13 +45,43 @@ public class SceneController : MonoBehaviour {
 		_sprite.color = highlightcolor;
 
 	}
+
+	public void SearchPath(){
+		Debug.Log("Start Searching.");
+		Debug.Log("The countour polygon "+ contourPoly);
+		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);
+		// Debug.Log("The types "+ typeof(contourPoly));// + typeof(contourPoly.Contours));
+		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
+
+		Debug.Log("The control point " + armyComponent.transform.position);
+		Debug.Log("The village point " + village.transform.position);
+		LinkedList<Polygon2D> polygons_linked_list = new LinkedList<Polygon2D>();
+
+		foreach(Contour contour in contourPoly.Contours )
+		{
+			Debug.Log("contour " +contour.Vertices);
+			Polygon2D new_polygon = new Polygon2D();
+			foreach(Vector2D vertex in contour.Vertices )
+			{
+				new_polygon.AddVertex(new Vector2((float) vertex.x, (float) vertex.y));
+			}
+			polygons_linked_list.AddLast(new_polygon);
+		}
+		Debug.Log("Test " + contourPoly.Contours[0].Vertices);
+
+		Vector2 control_point = new Vector2(armyComponent.transform.position[0], armyComponent.transform.position[1]);
+		Vector2 village_point = new Vector2(village.transform.position[0], village.transform.position[1]);
+		visibility_graph = new VisibilityGraph(polygons_linked_list, control_point , village_point);
+
+		contains_visibility_graph = true;
+	}
 	
 	// Update is called once per frame
 	void Update () {
 		if (Input.GetMouseButtonDown(0))
 		{
 			Vector3 pos = Input.mousePosition;
-			Debug.Log("We are clicking somewhere" + pos);
 			Vector3 pos_world = Camera.main.ScreenToWorldPoint(
 						new Vector3(Input.mousePosition.x,
 						Input.mousePosition.y,
@@ -84,7 +122,9 @@ public class SceneController : MonoBehaviour {
 
 	private void CreateMountain(Vector3 worldPosition)
     {
-		if (worldPosition[0] > -15)
+		// Debug.Log("We are clicking somewhere" + worldPosition);
+
+		if ((worldPosition[0] > -15) && (worldPosition[0] < 20))
 		{
 			// Instantiate the mountain prefab
 			
@@ -134,10 +174,10 @@ public class SceneController : MonoBehaviour {
 		List<Vector2> sumVertices = new List<Vector2>();
 		foreach (Vector2 v in armyComponent.myPolygon.Vertices)
         {
-			Debug.Log("Hallo from Mikowski sum, this is an army component: "+ v);
+			// Debug.Log("Hallo from Mikowski sum, this is an army component: "+ v);
 			foreach (Vector2D v2 in oldContour.Vertices)
             {
-				Debug.Log("Hallo from Mikowski sum, this is an contour component: "+ v2);
+				// Debug.Log("Hallo from Mikowski sum, this is an contour component: "+ v2);
 				sumVertices.Add(new Vector2(v.x + (float)v2.x, v.y + (float)v2.y));
             }
         }
@@ -157,6 +197,10 @@ public class SceneController : MonoBehaviour {
         {
 			DrawContour(c);
         }
+
+		if (contains_visibility_graph){
+			DrawVisibilityGraph();
+		}
 	}
 
 	private void DrawContour(Contour c)
@@ -178,5 +222,27 @@ public class SceneController : MonoBehaviour {
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
 		GL.End();
+
+	}
+
+	private void DrawVisibilityGraph(){
+		GL.Begin(GL.LINE_STRIP);
+		float t = Mathf.Sin(Time.time)*Mathf.Sin(Time.time);
+		GL.Color(new Color(
+				Mathf.Lerp(1f, 0.6f, t),
+				Mathf.Lerp(0.5f, 0.7f, t),
+				Mathf.Lerp(0.3f, 1.0f, t)
+		 ));
+		//GL.Color(Color.red);
+		foreach (Vertex v in visibility_graph.m_vertices)
+		{
+			Debug.Log("This is vertex v" + v);
+			Debug.Log("This is its position " + v.Pos);
+			GL.Vertex(new Vector3(v.Pos[0], v.Pos[1], 0));
+		}
+		var last = visibility_graph.m_vertices.First();
+		GL.Vertex(new Vector3((float)last.Pos[0], (float)last.Pos[1], 0));
+		GL.End();
+
 	}
 }
