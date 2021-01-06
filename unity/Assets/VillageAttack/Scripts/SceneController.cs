@@ -14,19 +14,28 @@ using Util.Algorithms.Polygon;
 
 public class SceneController : MonoBehaviour {
 	[SerializeField] public GameObject[] MountainPrefabs;
+	[SerializeField] public GameObject[] buttons;
 	private GameObject _mountain;
 	private int _current_prefab = 1;
-	public List<PolyMountain> mountains = new List<PolyMountain>();
+	public List<PolyMountain> wd = new List<PolyMountain>();
 	private ContourPolygon contourPoly = new ContourPolygon();
 	private Material m_LineMaterial;
+	public Color highlightcolor = Color.cyan;
 
 	// Use this for initialization
 	void Start () {
-		
+		SpriteRenderer _sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
+		_sprite.color = highlightcolor;
 	}
 
 	public void SetCurrentPrefab(int next_prefab){
+		SpriteRenderer _sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
+		_sprite.color = Color.white;
+
 		_current_prefab = next_prefab;
+		_sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
+		_sprite.color = highlightcolor;
+
 	}
 	
 	// Update is called once per frame
@@ -78,20 +87,37 @@ public class SceneController : MonoBehaviour {
 		if (worldPosition[0] > -15)
 		{
 			// Instantiate the mountain prefab
-			Contour c = new Contour();
-			c.AddVertex(new Vector2D(-3 + worldPosition[0], worldPosition[1]));
-			c.AddVertex(new Vector2D(-3 + worldPosition[0], 3 + worldPosition[1]));
-			c.AddVertex(new Vector2D(3 + worldPosition[0], 3 + worldPosition[1]));
-			c.AddVertex(new Vector2D(3 + worldPosition[0], worldPosition[1]));
-			// Merge the minkowski sum of the new contour with the remaining contours
-			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+			
 
-			_mountain = Instantiate(MountainPrefabs[this._current_prefab]) as GameObject;
+			Contour c = new Contour();
+			// c.AddVertex(new Vector2D(-2 + worldPosition[0], worldPosition[1]));
+			// c.AddVertex(new Vector2D(-2 + worldPosition[0], 2 + worldPosition[1]));
+			// c.AddVertex(new Vector2D(2 + worldPosition[0], 2 + worldPosition[1]));
+			// c.AddVertex(new Vector2D(2 + worldPosition[0], worldPosition[1]));
+			// Merge the minkowski sum of the new contour with the remaining contours
+			// MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+
+			GameObject _mountain = Instantiate(MountainPrefabs[this._current_prefab]) as GameObject;
 			_mountain.transform.position = new Vector3(worldPosition[0], worldPosition[1], worldPosition[2]);
+			MountainBehaviour mountain_script = _mountain.GetComponent<MountainBehaviour>();
+			mountain_script.SetPolygon(worldPosition);
+			// Debug.Log("This is the mountain prefab " + _mountain);
+			// Debug.Log("This is the mountain_script " + mountain_script.myPolygon.Vertices);
+
+			// Vector3 pscale = Vector3.one;
+			foreach (Vector2 v in mountain_script.myPolygon.Vertices){
+				Debug.Log("Hallo from Create mountain"+ v);
+				c.AddVertex(new Vector2D(v.x, v.y));
+			}
+			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+			// _mountain.transform.localScale = pscale;
+			// GameObject _mountain_script = _mountain.GetComponent<Mountain>() as GameObject;
+			// _mountain.UpdatePolygon(new Vector2(worldPosition[0], worldPosition[1]));
 		}
 	}
 	private void MergeContours(ContourPolygon newContour)
     {
+		Debug.Log("Hello from Merge Contours");
 		if (contourPoly.Contours.Count != 0)
 		{
 			var martinez = new Martinez(contourPoly, newContour, Martinez.OperationType.Union);
@@ -108,8 +134,10 @@ public class SceneController : MonoBehaviour {
 		List<Vector2> sumVertices = new List<Vector2>();
 		foreach (Vector2 v in armyComponent.myPolygon.Vertices)
         {
+			Debug.Log("Hallo from Mikowski sum, this is an army component: "+ v);
 			foreach (Vector2D v2 in oldContour.Vertices)
             {
+				Debug.Log("Hallo from Mikowski sum, this is an contour component: "+ v2);
 				sumVertices.Add(new Vector2(v.x + (float)v2.x, v.y + (float)v2.y));
             }
         }

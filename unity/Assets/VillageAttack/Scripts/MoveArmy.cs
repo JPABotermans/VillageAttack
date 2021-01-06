@@ -25,7 +25,8 @@ public class MoveArmy : MonoBehaviour {
 		//initialize the polygon and its mesh
 		Polygon2D polygon = new Polygon2D();
 		polygon.AddVertex(new Vector2(-1, -1));
-		polygon.AddVertex(new Vector2(0, 2));
+		polygon.AddVertex(new Vector2(-1, 1));
+		polygon.AddVertex(new Vector2(1, 1));
 		polygon.AddVertex(new Vector2(1, -1));
 		myMesh = gameObject.GetComponent<Polygon2DMesh>();
 		myMesh.Polygon = polygon;
@@ -71,12 +72,6 @@ public class MoveArmy : MonoBehaviour {
 		_body.velocity = movement;
 
 		DrawPath();
-		// Debug.Log(village_collision);
-		// if (village_collision != null){
-
-		// 	Debug.Log("we have won");
-		// }
-		// // Debug.Log("We are moving to " + startPos);dw
 
 	}
 

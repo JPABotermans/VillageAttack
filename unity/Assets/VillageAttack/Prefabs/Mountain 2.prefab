@@ -19,13 +19,13 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4099383572060812}
+  - component: {fileID: 114354470646168828}
   - component: {fileID: 61903737738554266}
   - component: {fileID: 114517096580557564}
-  - component: {fileID: 114354470646168828}
   - component: {fileID: 33340451739560240}
-  - component: {fileID: 23157978634288018}
+  - component: {fileID: 23473717902308126}
   m_Layer: 0
-  m_Name: Mountain
+  m_Name: Mountain 2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -55,7 +55,7 @@ Transform:
   m_GameObject: {fileID: 1174321338423250}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: -10}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2, y: 0.5, z: 1}
   m_Children:
   - {fileID: 4711940862798654}
   m_Father: {fileID: 0}
@@ -74,7 +74,7 @@ Transform:
   m_Father: {fileID: 4099383572060812}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!23 &23157978634288018
+--- !u!23 &23473717902308126
 MeshRenderer:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -85,8 +85,8 @@ MeshRenderer:
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
   m_MotionVectors: 1
-  m_LightProbeUsage: 0
-  m_ReflectionProbeUsage: 0
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
   - {fileID: 0}
@@ -153,7 +153,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   controller: {fileID: 0}
-  scale: {x: 1, y: 1}
+  scale: {x: 0.5, y: 2}
   myMesh: {fileID: 0}
 --- !u!114 &114517096580557564
 MonoBehaviour:
