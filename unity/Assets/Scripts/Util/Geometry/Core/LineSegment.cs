@@ -123,6 +123,18 @@
             return MathUtil.EqualsEps(Point1, a_Point) || MathUtil.EqualsEps(Point2, a_Point);
         }
 
+        public bool IsOverlapping(LineSegment a)
+        {
+            if (!Line.IsParallel(a.Line)){
+                return false;
+            }
+            if(a.IsOnSegment(Point1) || a.IsOnSegment(Point2) || IsOnSegment(a.Point1) || IsOnSegment(a.Point2))
+            {
+                return true;
+            }
+            return false;
+        }
+
         /// <summary>
         /// Returns the unique intersection between a_seg1 and a_seg2. If there is one, if a_seg1 and a_seg2 coincide for a part we return 0
         /// </summary>
