@@ -234,11 +234,10 @@ public class SceneController : MonoBehaviour {
 		float t = Mathf.Sin(Time.time)*Mathf.Sin(Time.time);
 		
 		GL.Color(Color.red);
-		foreach (Vertex v in visibility_graph.m_vertices)
+		foreach (Edge e in visibility_graph.g.Edges)
 		{
-			Debug.Log("This is vertex v" + v);
-			Debug.Log("This is its position " + v.Pos);
-			GL.Vertex(new Vector3(v.Pos[0], v.Pos[1], 0));
+			GL.Vertex(new Vector3(e.Start.Pos[0], e.Start.Pos[1], 0));
+			GL.Vertex(new Vector3(e.End.Pos[0], e.End.Pos[1], 0));
 		}
 		var last = visibility_graph.m_vertices.First();
 		GL.Vertex(new Vector3((float)last.Pos[0], (float)last.Pos[1], 0));
