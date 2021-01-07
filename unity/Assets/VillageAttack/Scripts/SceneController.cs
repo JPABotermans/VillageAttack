@@ -52,6 +52,8 @@ public class SceneController : MonoBehaviour {
 		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);
 		// Debug.Log("The types "+ typeof(contourPoly));// + typeof(contourPoly.Contours));
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		village = GameObject.FindGameObjectsWithTag("Finish")[0];
+
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
 
 		Debug.Log("The control point " + armyComponent.transform.position);
@@ -153,6 +155,7 @@ public class SceneController : MonoBehaviour {
 			// _mountain.transform.localScale = pscale;
 			// GameObject _mountain_script = _mountain.GetComponent<Mountain>() as GameObject;
 			// _mountain.UpdatePolygon(new Vector2(worldPosition[0], worldPosition[1]));
+			SearchPath();
 		}
 	}
 	private void MergeContours(ContourPolygon newContour)
@@ -205,6 +208,7 @@ public class SceneController : MonoBehaviour {
 
 	private void DrawContour(Contour c)
     {
+		/*
 		Assert.IsTrue(c.VertexCount > 1);
 
 		GL.Begin(GL.LINE_STRIP);
@@ -222,18 +226,14 @@ public class SceneController : MonoBehaviour {
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
 		GL.End();
-
+		*/
 	}
 
 	private void DrawVisibilityGraph(){
 		GL.Begin(GL.LINE_STRIP);
 		float t = Mathf.Sin(Time.time)*Mathf.Sin(Time.time);
-		GL.Color(new Color(
-				Mathf.Lerp(1f, 0.6f, t),
-				Mathf.Lerp(0.5f, 0.7f, t),
-				Mathf.Lerp(0.3f, 1.0f, t)
-		 ));
-		//GL.Color(Color.red);
+		
+		GL.Color(Color.red);
 		foreach (Vertex v in visibility_graph.m_vertices)
 		{
 			Debug.Log("This is vertex v" + v);
