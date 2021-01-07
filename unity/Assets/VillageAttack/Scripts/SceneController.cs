@@ -66,11 +66,11 @@ public class SceneController : MonoBehaviour {
 			Polygon2D new_polygon = new Polygon2D();
 			foreach(Vector2D vertex in contour.Vertices )
 			{
-				new_polygon.AddVertex(new Vector2((float) vertex.x, (float) vertex.y));
+				new_polygon.AddVertexFirst(new Vector2((float)vertex.x, (float)vertex.y));
+				//new_polygon.AddVertex(new Vector2((float) vertex.x, (float) vertex.y));
 			}
 			polygons_linked_list.AddLast(new_polygon);
 		}
-		Debug.Log("Test " + contourPoly.Contours[0].Vertices);
 
 		Vector2 control_point = new Vector2(armyComponent.transform.position[0], armyComponent.transform.position[1]);
 		Vector2 village_point = new Vector2(village.transform.position[0], village.transform.position[1]);
