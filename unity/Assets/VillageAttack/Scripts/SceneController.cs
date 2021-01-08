@@ -165,6 +165,9 @@ public class SceneController : MonoBehaviour {
 		{
 			var martinez = new Martinez(contourPoly, newContour, Martinez.OperationType.Union);
 			contourPoly = martinez.Run();
+			foreach (Contour c in contourPoly.Contours) {
+				c.ChangeOrientation();
+            }
 		} else {
 			contourPoly = newContour;
 		}
@@ -198,7 +201,7 @@ public class SceneController : MonoBehaviour {
 		m_LineMaterial.SetPass(0);
 		foreach (Contour c in contourPoly.Contours)
         {
-			DrawContour(c);
+			//DrawContour(c);
         }
 
 		if (contains_visibility_graph){
@@ -208,7 +211,6 @@ public class SceneController : MonoBehaviour {
 
 	private void DrawContour(Contour c)
     {
-		/*
 		Assert.IsTrue(c.VertexCount > 1);
 
 		GL.Begin(GL.LINE_STRIP);
@@ -226,22 +228,16 @@ public class SceneController : MonoBehaviour {
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
 		GL.End();
-		*/
 	}
 
 	private void DrawVisibilityGraph(){
-		GL.Begin(GL.LINE_STRIP);
-		float t = Mathf.Sin(Time.time)*Mathf.Sin(Time.time);
-		
+		GL.Begin(GL.LINES);
 		GL.Color(Color.red);
 		foreach (Edge e in visibility_graph.g.Edges)
 		{
 			GL.Vertex(new Vector3(e.Start.Pos[0], e.Start.Pos[1], 0));
 			GL.Vertex(new Vector3(e.End.Pos[0], e.End.Pos[1], 0));
 		}
-		var last = visibility_graph.m_vertices.First();
-		GL.Vertex(new Vector3((float)last.Pos[0], (float)last.Pos[1], 0));
 		GL.End();
-
 	}
 }

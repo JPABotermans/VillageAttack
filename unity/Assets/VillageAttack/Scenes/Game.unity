@@ -1308,7 +1308,7 @@ GameObject:
   - component: {fileID: 1408198625}
   m_Layer: 0
   m_Name: Village
-  m_TagString: Untagged
+  m_TagString: Finish
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1871,6 +1871,7 @@ MonoBehaviour:
   - {fileID: 304804356}
   - {fileID: 1566216634}
   - {fileID: 122300315}
+  village: {fileID: 0}
   wd: []
   highlightcolor: {r: 0, g: 1, b: 1, a: 1}
 --- !u!4 &1881385355
