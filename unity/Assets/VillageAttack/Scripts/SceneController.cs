@@ -23,7 +23,12 @@ public class SceneController : MonoBehaviour {
 	private int _current_prefab = 1;
 	public List<PolyMountain> wd = new List<PolyMountain>();
 	private ContourPolygon contourPoly = new ContourPolygon();
+	private LinkedList<Polygon2D> polygons_linked_list = new LinkedList<Polygon2D>();
 	private Material m_LineMaterial;
+	private bool drawContour = false;
+	private bool drawPolygon = false;
+	private bool drawVisibilityGraph = true;
+
 	public Color highlightcolor = Color.cyan;
 
 	private bool contains_visibility_graph = false;
@@ -47,30 +52,52 @@ public class SceneController : MonoBehaviour {
 	}
 
 	public void SearchPath(){
-		Debug.Log("Start Searching.");
+		/*Debug.Log("Start Searching.");
 		Debug.Log("The countour polygon "+ contourPoly);
-		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);
-		// Debug.Log("The types "+ typeof(contourPoly));// + typeof(contourPoly.Contours));
+		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);*/
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
 		village = GameObject.FindGameObjectsWithTag("Finish")[0];
 
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
 
-		Debug.Log("The control point " + armyComponent.transform.position);
-		Debug.Log("The village point " + village.transform.position);
-		LinkedList<Polygon2D> polygons_linked_list = new LinkedList<Polygon2D>();
+		/*Debug.Log("The control point " + armyComponent.transform.position);
+		Debug.Log("The village point " + village.transform.position);*/
+		polygons_linked_list = new LinkedList<Polygon2D>();
 
 		foreach(Contour contour in contourPoly.Contours )
 		{
-			Debug.Log("contour " +contour.Vertices);
 			Polygon2D new_polygon = new Polygon2D();
 			foreach(Vector2D vertex in contour.Vertices )
 			{
 				new_polygon.AddVertexFirst(new Vector2((float)vertex.x, (float)vertex.y));
-				//new_polygon.AddVertex(new Vector2((float) vertex.x, (float) vertex.y));
 			}
 			polygons_linked_list.AddLast(new_polygon);
 		}
+
+		// Remove duplicate vertices
+		foreach (Polygon2D c in polygons_linked_list)
+		{
+			List<Vector2> toRemove = new List<Vector2>();
+			for (int i = 0; i < c.VertexCount; i++)
+            {
+				var v = c.Vertices.ElementAt(i);
+				for (int j = i+1; j < c.VertexCount; j ++)
+                {
+					var v2 = c.Vertices.ElementAt(j);
+					if (i != j && v.x == v2.x && v.y == v2.y)
+					{
+						toRemove.Add(v2);
+					}
+				}
+            }
+			foreach (Vector2 i in toRemove)
+            {
+				c.RemoveVertex(i);
+            }
+			Debug.Log("Number of vertices of this polygon: " + c.Vertices.Count);
+			Debug.Log("Clockwise:" + c.IsClockwise() + ", convex:" + c.IsConvex() + ", simple:" + c.IsSimple());
+		}
+		Debug.Log("------------ # of polygons passed to VisibilityGraphAlgo: " + polygons_linked_list.Count);
 
 		Vector2 control_point = new Vector2(armyComponent.transform.position[0], armyComponent.transform.position[1]);
 		Vector2 village_point = new Vector2(village.transform.position[0], village.transform.position[1]);
@@ -81,6 +108,15 @@ public class SceneController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		if (Input.GetKeyUp(KeyCode.Z))
+		{
+			drawContour = !drawContour;
+		} else if (Input.GetKeyUp(KeyCode.X)) {
+			drawPolygon = !drawPolygon;
+		} else if (Input.GetKeyUp(KeyCode.C)) {
+			drawVisibilityGraph = !drawVisibilityGraph;
+		}
+
 		if (Input.GetMouseButtonDown(0))
 		{
 			Vector3 pos = Input.mousePosition;
@@ -129,44 +165,38 @@ public class SceneController : MonoBehaviour {
 		if ((worldPosition[0] > -15) && (worldPosition[0] < 20))
 		{
 			// Instantiate the mountain prefab
-			
-
 			Contour c = new Contour();
-			// c.AddVertex(new Vector2D(-2 + worldPosition[0], worldPosition[1]));
-			// c.AddVertex(new Vector2D(-2 + worldPosition[0], 2 + worldPosition[1]));
-			// c.AddVertex(new Vector2D(2 + worldPosition[0], 2 + worldPosition[1]));
-			// c.AddVertex(new Vector2D(2 + worldPosition[0], worldPosition[1]));
-			// Merge the minkowski sum of the new contour with the remaining contours
-			// MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
-
 			GameObject _mountain = Instantiate(MountainPrefabs[this._current_prefab]) as GameObject;
 			_mountain.transform.position = new Vector3(worldPosition[0], worldPosition[1], worldPosition[2]);
 			MountainBehaviour mountain_script = _mountain.GetComponent<MountainBehaviour>();
 			mountain_script.SetPolygon(worldPosition);
-			// Debug.Log("This is the mountain prefab " + _mountain);
-			// Debug.Log("This is the mountain_script " + mountain_script.myPolygon.Vertices);
 
-			// Vector3 pscale = Vector3.one;
 			foreach (Vector2 v in mountain_script.myPolygon.Vertices){
-				Debug.Log("Hallo from Create mountain"+ v);
 				c.AddVertex(new Vector2D(v.x, v.y));
 			}
 			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
-			// _mountain.transform.localScale = pscale;
-			// GameObject _mountain_script = _mountain.GetComponent<Mountain>() as GameObject;
-			// _mountain.UpdatePolygon(new Vector2(worldPosition[0], worldPosition[1]));
+
 			SearchPath();
 		}
 	}
 	private void MergeContours(ContourPolygon newContour)
     {
-		Debug.Log("Hello from Merge Contours");
 		if (contourPoly.Contours.Count != 0)
 		{
 			var martinez = new Martinez(contourPoly, newContour, Martinez.OperationType.Union);
 			contourPoly = martinez.Run();
 			foreach (Contour c in contourPoly.Contours) {
-				c.ChangeOrientation();
+				foreach(Vector2D v in c.Vertices)
+                {
+					foreach(Vector2D v2 in c.Vertices)
+                    {
+						if (v != v2 && v.x == v2.x && v.y == v2.y)
+                        {
+							Debug.Log("Found a duplicate");
+							c.Vertices.Remove(v2);
+                        }
+                    }
+                }
             }
 		} else {
 			contourPoly = newContour;
@@ -199,12 +229,24 @@ public class SceneController : MonoBehaviour {
 	{
 		// Apply the line material
 		m_LineMaterial.SetPass(0);
-		foreach (Contour c in contourPoly.Contours)
-        {
-			//DrawContour(c);
-        }
+		if (drawContour) {
+			foreach (Contour c in contourPoly.Contours)
+			{
+				DrawContour(c);
+			}
+		}
 
-		if (contains_visibility_graph){
+		if (drawPolygon)
+		{
+			Color c = new Color(0, 0, 0);
+			foreach (Polygon2D p in polygons_linked_list)
+			{
+				DrawPolygon(p, c);
+				c = new Color(c.r+0.2f, c.g, c.b+0.2f);
+			}
+		}
+
+		if (contains_visibility_graph && drawVisibilityGraph){
 			DrawVisibilityGraph();
 		}
 	}
@@ -220,13 +262,27 @@ public class SceneController : MonoBehaviour {
 				Mathf.Lerp(0.5f, 0.7f, t),
 				Mathf.Lerp(0.3f, 1.0f, t)
 		 ));
-		//GL.Color(Color.red);
 		foreach (Vector2D v in c.Vertices)
 		{
 			GL.Vertex(new Vector3((float)v.x, (float)v.y, 0));
 		}
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
+		GL.End();
+	}
+
+	private void DrawPolygon(Polygon2D p, Color c)
+    {
+		Assert.IsTrue(p.VertexCount > 1);
+
+		GL.Begin(GL.LINE_STRIP);
+		GL.Color(c);
+		foreach (Vector2 v in p.Vertices)
+		{
+			GL.Vertex(new Vector3(v.x, v.y, 0));
+		}
+		var last = p.Vertices.First();
+		GL.Vertex(new Vector3(last.x, last.y, 0));
 		GL.End();
 	}
 

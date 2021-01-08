@@ -28,7 +28,7 @@ public class MountainBehaviour : MonoBehaviour {
 
 		Polygon2D polygon = new Polygon2D();
 		myMesh = gameObject.GetComponent<Polygon2DMesh>();
-		Debug.Log("Hallo from Set Polygon " + transform.position);
+		/*Debug.Log("Hallo from Set Polygon " + transform.position);*/
 
 		polygon.AddVertex(new Vector2(worldPosition[0]-1*scale[1], worldPosition[1]));
 		polygon.AddVertex(new Vector2(worldPosition[0], worldPosition[1]+1*scale[1]));
@@ -36,7 +36,7 @@ public class MountainBehaviour : MonoBehaviour {
 
 		myMesh.Polygon = polygon;
 		myPolygon = polygon;
-		Debug.Log("Hallo from Set Polygon " + myMesh.Polygon);
+		/*Debug.Log("Hallo from Set Polygon " + myMesh.Polygon);*/
 
 	}
 
