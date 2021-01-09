@@ -7,7 +7,7 @@ using Util.Geometry.Polygon;
 
 public class MoveArmy : MonoBehaviour {
 
-	private Vector2 speed = new Vector2(3f, 3f);
+	private Vector2 speed = new Vector2(1.5f, 1.5f);
 	private Vector3 startPos = new Vector3(-11f, -3.5f, -10f);
 	private Rigidbody2D _body;
 	private BoxCollider2D _box;
@@ -86,7 +86,7 @@ public class MoveArmy : MonoBehaviour {
     {
 		if (path.Count == 0) return;
 		GL.Begin(GL.LINE_STRIP);
-		GL.Color(Color.red);
+		GL.Color(Color.white);
 		GL.Vertex(_body.transform.position);
 		foreach (Vertex v in path)
         {

@@ -18,14 +18,16 @@
         private LinkedList<Polygon2D> m_polygons;
         private LinkedList<Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?>> m_vertex_association_data;
         public AdjacencyListGraph g { get; private set; }
+        public Vertex control_vertex;
+        public Vertex village_vertex;
 
         public VisibilityGraph(LinkedList<Polygon2D> polygons, Vector2 control_point, Vector2 village)
         {
             m_polygons = polygons;
             m_vertices = new LinkedList<Vertex>();
-            Vertex control_vertex = new Vertex(control_point);
+            control_vertex = new Vertex(control_point);
             m_vertices.AddLast(control_vertex);
-            Vertex village_vertex = new Vertex(village);
+            village_vertex = new Vertex(village);
             m_vertices.AddLast(village_vertex);
             m_vertex_association_data = new LinkedList<Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?>>();
             m_vertex_association_data.AddLast(new Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?>(control_point, null, null, control_vertex, null));

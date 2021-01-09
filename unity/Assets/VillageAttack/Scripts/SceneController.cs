@@ -97,11 +97,15 @@ public class SceneController : MonoBehaviour {
 			Debug.Log("Number of vertices of this polygon: " + c.Vertices.Count);
 			Debug.Log("Clockwise:" + c.IsClockwise() + ", convex:" + c.IsConvex() + ", simple:" + c.IsSimple());
 		}
+		// Remove all contained polygons
+		RemoveContainedPolygons(ref polygons_linked_list);
 		Debug.Log("------------ # of polygons passed to VisibilityGraphAlgo: " + polygons_linked_list.Count);
 
 		Vector2 control_point = new Vector2(armyComponent.transform.position[0], armyComponent.transform.position[1]);
 		Vector2 village_point = new Vector2(village.transform.position[0], village.transform.position[1]);
 		visibility_graph = new VisibilityGraph(polygons_linked_list, control_point , village_point);
+
+		NewPath(BFS(visibility_graph.g, visibility_graph.control_vertex, visibility_graph.village_vertex));
 
 		contains_visibility_graph = true;
 	}
@@ -126,14 +130,6 @@ public class SceneController : MonoBehaviour {
 						Camera.main.nearClipPlane)
 						);
 			CreateMountain(pos_world);
-		} else if (Input.GetMouseButtonUp(1)) {
-			Vector3 pos = Input.mousePosition;
-			Vector3 pos_world = Camera.main.ScreenToWorldPoint(
-						new Vector3(Input.mousePosition.x,
-						Input.mousePosition.y,
-						Camera.main.nearClipPlane)
-						);
-			AddNewPathVertex(pos_world);
 		}
 	}
 
@@ -150,12 +146,11 @@ public class SceneController : MonoBehaviour {
 		m_LineMaterial.SetInt("_ZWrite", 0);
 	}
 
-	private void AddNewPathVertex(Vector3 worldPosition)
+	private void NewPath(List<Vertex> path)
     {
-		Vertex vertex = new Vertex(worldPosition.x, worldPosition.y);
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
-		armyComponent.path.Add(vertex);
+		armyComponent.path = path;
     }
 
 	private void CreateMountain(Vector3 worldPosition)
@@ -179,6 +174,37 @@ public class SceneController : MonoBehaviour {
 			SearchPath();
 		}
 	}
+
+	private List<Vertex> BFS(AdjacencyListGraph g, Vertex root, Vertex goal)
+    {
+		Queue<List<Vertex>> queue = new Queue<List<Vertex>>();
+		List<Vertex> path = new List<Vertex>();
+		path.Add(root);
+		queue.Enqueue(path);
+
+		while (queue.Count != 0)
+        {
+			List<Vertex> p = queue.Dequeue();
+			Vertex v = p.Last();
+			if (object.ReferenceEquals(v, goal))
+            {
+				Debug.Log("Found GOAL VERTEX!");
+				return p;
+            }
+			foreach (Edge e in g.EdgesOf(v))
+            {
+				List<Vertex> newP = new List<Vertex>();
+				newP.AddRange(p);
+				Vertex v2 = object.ReferenceEquals(v, e.Start) ? e.End : e.Start;
+				newP.Add(v2);
+				queue.Enqueue(newP);
+            }
+        }
+
+		Debug.Log("Could not find any path to the village.");
+		return path;
+    }
+
 	private void MergeContours(ContourPolygon newContour)
     {
 		if (contourPoly.Contours.Count != 0)
@@ -201,6 +227,36 @@ public class SceneController : MonoBehaviour {
 		} else {
 			contourPoly = newContour;
 		}
+	}
+
+	private void RemoveContainedPolygons(ref LinkedList<Polygon2D> polygons)
+    {
+		List<Polygon2D> toRemove = new List<Polygon2D>();
+		foreach (Polygon2D p in polygons)
+		{
+			foreach (Polygon2D p2 in polygons)
+			{
+				if (object.ReferenceEquals(p, p2)) continue;
+
+				bool contained = true;
+				foreach (Vector2 v in p.Vertices)
+				{
+					if (!p2.ContainsInside(v))
+                    {
+						contained = false;
+						break;
+                    }
+				}
+				if (contained)
+                {
+					toRemove.Add(p);
+                }
+			}
+		}
+		foreach (Polygon2D p in toRemove)
+        {
+			polygons.Remove(p);
+        }
 	}
 
 	private Contour MinkowskiSum(Contour oldContour)
@@ -283,6 +339,22 @@ public class SceneController : MonoBehaviour {
 		}
 		var last = p.Vertices.First();
 		GL.Vertex(new Vector3(last.x, last.y, 0));
+		GL.End();
+
+		// Draw vertices as crosses
+		GL.Begin(GL.LINES);
+		GL.Color(Color.blue);
+		foreach (Vector2 v in p.Vertices)
+		{
+			GL.Vertex(new Vector3(v.x, v.y, 0));
+			GL.Vertex(new Vector3(v.x+0.1f, v.y+0.1f, 0));
+			GL.Vertex(new Vector3(v.x, v.y, 0));
+			GL.Vertex(new Vector3(v.x - 0.1f, v.y - 0.1f, 0));
+			GL.Vertex(new Vector3(v.x, v.y, 0));
+			GL.Vertex(new Vector3(v.x + 0.1f, v.y - 0.1f, 0));
+			GL.Vertex(new Vector3(v.x, v.y, 0));
+			GL.Vertex(new Vector3(v.x - 0.1f, v.y + 0.1f, 0));
+		}
 		GL.End();
 	}
 
