@@ -155,13 +155,15 @@
                     status.Delete(seg2, Event.Item1);
                 }
                 status.FindMin(out VisibleSegment);
+                bool directsinside = DirectsInside(v.Item1, v.Item2, v.Item3, Event.Item1, v.Item5);
                 if (VisibleSegment != null)
                 {
-                    visible = !DirectsInside(v.Item1, v.Item2, v.Item3, Event.Item1, v.Item5) && VisibleSegment.Intersect(new LineSegment(v.Item1, Event.Item1)) == null;
+                    bool no_intersects = VisibleSegment.Intersect(new LineSegment(v.Item1, Event.Item1)) == null;
+                    visible = !directsinside && no_intersects;
                 }
                 else
                 {
-                    visible = !DirectsInside(v.Item1, v.Item2, v.Item3, Event.Item1, v.Item5);
+                    visible = !directsinside;
                 }
                 if (!seg1InStatus && !seg1.IsOnSegment(v.Item1))
                 {

@@ -289,6 +289,7 @@ public class SceneController : MonoBehaviour {
 	private void DrawVisibilityGraph(){
 		GL.Begin(GL.LINES);
 		GL.Color(Color.red);
+        var g = visibility_graph.g;
 		foreach (Edge e in visibility_graph.g.Edges)
 		{
 			GL.Vertex(new Vector3(e.Start.Pos[0], e.Start.Pos[1], 0));
