@@ -43,7 +43,7 @@
             LinkedList<Edge> edges = new LinkedList<Edge>();
             foreach(Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> origin in m_vertex_association_data)
             {
-                LinkedList<Vertex> visible_vertices = this.VisibleVertices(origin);
+                LinkedList<Vertex> visible_vertices = this.NaiveVisibleVertices(origin.Item4);
                 foreach(Vertex target in visible_vertices)
                 {
                     float weight = (origin.Item1 - target.Pos).magnitude;
@@ -205,6 +205,48 @@
                 }
                 return true;
             }
+        }
+
+        private LinkedList<Vertex> NaiveVisibleVertices(Vertex v)
+        {
+            LinkedList<Vertex> result = new LinkedList<Vertex>();
+            foreach (Vertex p in this.m_vertices)
+            {
+                if (this.NaiveIsVisible(v, p))
+                {
+                    result.AddLast(p);
+                }
+
+            }
+            return result;
+        }
+
+        private bool NaiveIsVisible(Vertex p, Vertex v)
+        {
+            if (p.Pos.Equals(v.Pos))
+            {
+                return false;
+            }
+            LineSegment seg = new LineSegment(p.Pos, v.Pos);
+            foreach (Polygon2D poly in this.m_polygons)
+            {
+                if (poly.OnBoundary(p.Pos) && poly.OnBoundary(v.Pos) && poly.Contains((v.Pos + p.Pos) / 2) && !(poly.OnBoundary((v.Pos + p.Pos) / 2)))
+                {
+                    return false;
+                }
+                foreach (LineSegment intersecting_segment in poly.Segments)
+                {
+                    Vector2? intersecting_point = seg.Intersect(intersecting_segment);
+                    if (intersecting_point != null)
+                    {
+                        if (!(intersecting_point == v.Pos || intersecting_point == p.Pos))
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 
