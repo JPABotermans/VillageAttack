@@ -13,12 +13,18 @@ using System.Linq;
 using Util.Algorithms.Polygon;
 using Util.VisibilityGraph;
 using Util.Geometry.Graph;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
 
 public class SceneController : MonoBehaviour {
 	[SerializeField] public GameObject[] MountainPrefabs;
 	[SerializeField] public GameObject[] buttons;
 
 	[SerializeField] public GameObject village;
+	[SerializeField] public SpriteRenderer[] mountainSprites;
+	[SerializeField] private TextMesh TimeText;
+	
 	private GameObject _mountain;
 	private int _current_prefab = 1;
 	public List<PolyMountain> wd = new List<PolyMountain>();
@@ -35,19 +41,34 @@ public class SceneController : MonoBehaviour {
 
 	public VisibilityGraph visibility_graph;
 
+	private int startTime = 30;
+	private float secondsCounted;
+	
+	private bool _army_moving = false;
+	// private IEnumerator UpdateTime(){
+	// 	if (_army_moving){
+	// 	secondsCounted -= (int) Time.deltaTime;
+	// 	TimeText.text = "Seconds left " + secondsCounted ;
+
+	// 	}
+	// 	else {
+	// 		TimeText.text = "Seconds left: 60 " ;
+	// 	}
+	// }
 	// Use this for initialization
 	void Start () {
-		SpriteRenderer _sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
-		_sprite.color = highlightcolor;
+		secondsCounted = 30;
+		Debug.Log("The sprite" + mountainSprites[_current_prefab]);
+		mountainSprites[_current_prefab].color = highlightcolor;
+		StartCoroutine(UpdateTime());
 	}
 
 	public void SetCurrentPrefab(int next_prefab){
-		SpriteRenderer _sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
-		_sprite.color = Color.white;
+
+		mountainSprites[_current_prefab].color = Color.white;
 
 		_current_prefab = next_prefab;
-		_sprite = buttons[_current_prefab].GetComponentInChildren<SpriteRenderer>();
-		_sprite.color = highlightcolor;
+		mountainSprites[_current_prefab].color = highlightcolor;
 
 	}
 
@@ -55,6 +76,7 @@ public class SceneController : MonoBehaviour {
 		/*Debug.Log("Start Searching.");
 		Debug.Log("The countour polygon "+ contourPoly);
 		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);*/
+		_army_moving = true;
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
 		village = GameObject.FindGameObjectsWithTag("Finish")[0];
 
@@ -112,6 +134,8 @@ public class SceneController : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+		StartCoroutine(UpdateTime());
+
 		if (Input.GetKeyUp(KeyCode.Z))
 		{
 			drawContour = !drawContour;
@@ -131,6 +155,7 @@ public class SceneController : MonoBehaviour {
 						);
 			CreateMountain(pos_world);
 		}
+
 	}
 
 	void Awake()
@@ -171,7 +196,7 @@ public class SceneController : MonoBehaviour {
 			}
 			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
 
-			SearchPath();
+			// SearchPath();
 		}
 	}
 
@@ -368,5 +393,27 @@ public class SceneController : MonoBehaviour {
 			GL.Vertex(new Vector3(e.End.Pos[0], e.End.Pos[1], 0));
 		}
 		GL.End();
+	}
+	private IEnumerator UpdateTime(){
+		if (_army_moving){
+		secondsCounted -= Time.deltaTime;
+		TimeText.text = "Seconds left " +  (int) secondsCounted;
+		if (secondsCounted< 0){
+			SceneManager.LoadScene("Won");
+		}
+		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		
+		
+		
+		var distance =  (army.transform.position - village.transform.position).magnitude;
+		if (distance < 0.5) {
+			SceneManager.LoadScene("Lost");
+		}
+
+		}
+		else {
+			TimeText.text = "Seconds left: 60 " ;
+		}
+		yield return new WaitForSeconds(0.5f);
 	}
 }
