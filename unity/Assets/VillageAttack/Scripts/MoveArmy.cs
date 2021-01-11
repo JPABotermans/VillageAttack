@@ -13,7 +13,7 @@ public class MoveArmy : MonoBehaviour {
 	private BoxCollider2D _box;
 	private Material m_LineMaterial;
 	public List<Vertex> path = new List<Vertex>();
-	private static float epsilon = 0.5f;
+	private static float epsilon = 0.2f;
 	private Polygon2DMesh myMesh;
 	public Polygon2D myPolygon = new Polygon2D();
 

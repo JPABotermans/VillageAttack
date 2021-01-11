@@ -128,4 +128,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/VillageAttack/Scenes/Won.unity
     guid: 138b06090c520498bb37b455da841d24
+  - enabled: 1
+    path: Assets/VillageAttack/Scenes/Lost.unity
+    guid: 52c92af331ae945e1b16f54477711f53
   m_configObjects: {}

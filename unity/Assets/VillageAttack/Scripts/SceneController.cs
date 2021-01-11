@@ -29,11 +29,13 @@ public class SceneController : MonoBehaviour {
 	private int _current_prefab = 1;
 	public List<PolyMountain> wd = new List<PolyMountain>();
 	private ContourPolygon contourPoly = new ContourPolygon();
+	private ContourPolygon preMinkowskiPoly = new ContourPolygon();
 	private LinkedList<Polygon2D> polygons_linked_list = new LinkedList<Polygon2D>();
 	private Material m_LineMaterial;
+	private bool drawPreMinkowskiContour = true;
 	private bool drawContour = false;
 	private bool drawPolygon = false;
-	private bool drawVisibilityGraph = true;
+	private bool drawVisibilityGraph = false;
 
 	public Color highlightcolor = Color.cyan;
 
@@ -194,7 +196,8 @@ public class SceneController : MonoBehaviour {
 			foreach (Vector2 v in mountain_script.myPolygon.Vertices){
 				c.AddVertex(new Vector2D(v.x, v.y));
 			}
-			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+			preMinkowskiPoly = MergeContours(new ContourPolygon(new List<Contour> { c }), preMinkowskiPoly);
+			contourPoly = MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }), contourPoly);
 
 			// SearchPath();
 		}
@@ -230,13 +233,13 @@ public class SceneController : MonoBehaviour {
 		return path;
     }
 
-	private void MergeContours(ContourPolygon newContour)
+	private ContourPolygon MergeContours(ContourPolygon newContour, ContourPolygon oldContour)
     {
 		if (contourPoly.Contours.Count != 0)
 		{
-			var martinez = new Martinez(contourPoly, newContour, Martinez.OperationType.Union);
-			contourPoly = martinez.Run();
-			foreach (Contour c in contourPoly.Contours) {
+			var martinez = new Martinez(oldContour, newContour, Martinez.OperationType.Union);
+			return martinez.Run();
+			foreach (Contour c in oldContour.Contours) {
 				foreach(Vector2D v in c.Vertices)
                 {
 					foreach(Vector2D v2 in c.Vertices)
@@ -250,7 +253,7 @@ public class SceneController : MonoBehaviour {
                 }
             }
 		} else {
-			contourPoly = newContour;
+			return newContour;
 		}
 	}
 
@@ -310,6 +313,15 @@ public class SceneController : MonoBehaviour {
 	{
 		// Apply the line material
 		m_LineMaterial.SetPass(0);
+
+		if (drawPreMinkowskiContour)
+        {
+			foreach (Contour c in preMinkowskiPoly.Contours)
+			{
+				DrawContour(c);
+			}
+		}
+
 		if (drawContour) {
 			foreach (Contour c in contourPoly.Contours)
 			{
@@ -330,6 +342,8 @@ public class SceneController : MonoBehaviour {
 		if (contains_visibility_graph && drawVisibilityGraph){
 			DrawVisibilityGraph();
 		}
+
+		DrawHintPolygon();
 	}
 
 	private void DrawContour(Contour c)
@@ -350,6 +364,30 @@ public class SceneController : MonoBehaviour {
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
 		GL.End();
+	}
+
+	private void DrawHintPolygon()
+    {
+		GL.Begin(GL.LINE_STRIP);
+		GL.Color(Color.blue);
+		Vector3 pos = Input.mousePosition;
+		Vector3 pos_world = Camera.main.ScreenToWorldPoint(
+					new Vector3(Input.mousePosition.x,
+					Input.mousePosition.y,
+					Camera.main.nearClipPlane)
+					);
+		MountainBehaviour b = MountainPrefabs[this._current_prefab].GetComponent<MountainBehaviour>();
+
+		// Draw the polygon on the position where mountain will be placed
+		// using the scaling of the selected mountain
+		Debug.Log(b.scale.ToString());
+		GL.Vertex(new Vector3(pos_world.x - 0.5f*b.scale[0], pos_world.y - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x, pos_world.y + b.scale[1] - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x + b.scale[0], pos_world.y - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x - 0.5f * b.scale[0], pos_world.y - 0.5f, 0));
+		GL.End();
+
+		// Draw player polygon
 	}
 
 	private void DrawPolygon(Polygon2D p, Color c)
