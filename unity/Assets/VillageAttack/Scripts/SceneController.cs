@@ -1,20 +1,15 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine;
 using Util.Geometry.Graph;
 using Util.Geometry.Polygon;
-using General.UI;
-using General.Model;
 using Util.Geometry.Contour;
 using UnityEngine.Assertions;
 using Util.Geometry;
 using System.Linq;
 using Util.Algorithms.Polygon;
 using Util.VisibilityGraph;
-using Util.Geometry.Graph;
 using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 
 
 public class SceneController : MonoBehaviour {
@@ -47,17 +42,7 @@ public class SceneController : MonoBehaviour {
 	private float secondsCounted;
 	
 	private bool _army_moving = false;
-	// private IEnumerator UpdateTime(){
-	// 	if (_army_moving){
-	// 	secondsCounted -= (int) Time.deltaTime;
-	// 	TimeText.text = "Seconds left " + secondsCounted ;
 
-	// 	}
-	// 	else {
-	// 		TimeText.text = "Seconds left: 60 " ;
-	// 	}
-	// }
-	// Use this for initialization
 	void Start () {
 		secondsCounted = 30;
 		Debug.Log("The sprite" + mountainSprites[_current_prefab]);
@@ -75,17 +60,12 @@ public class SceneController : MonoBehaviour {
 	}
 
 	public void SearchPath(){
-		/*Debug.Log("Start Searching.");
-		Debug.Log("The countour polygon "+ contourPoly);
-		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);*/
 		_army_moving = true;
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
 		village = GameObject.FindGameObjectsWithTag("Finish")[0];
 
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
 
-		/*Debug.Log("The control point " + armyComponent.transform.position);
-		Debug.Log("The village point " + village.transform.position);*/
 		polygons_linked_list = new LinkedList<Polygon2D>();
 
 		foreach(Contour contour in contourPoly.Contours )
@@ -294,10 +274,8 @@ public class SceneController : MonoBehaviour {
 		List<Vector2> sumVertices = new List<Vector2>();
 		foreach (Vector2 v in armyComponent.myPolygon.Vertices)
         {
-			// Debug.Log("Hallo from Mikowski sum, this is an army component: "+ v);
 			foreach (Vector2D v2 in oldContour.Vertices)
             {
-				// Debug.Log("Hallo from Mikowski sum, this is an contour component: "+ v2);
 				sumVertices.Add(new Vector2(v.x + (float)v2.x, v.y + (float)v2.y));
             }
         }
@@ -388,6 +366,17 @@ public class SceneController : MonoBehaviour {
 		GL.End();
 
 		// Draw player polygon
+		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
+
+		GL.Begin(GL.LINE_STRIP);
+		foreach (Vector2 v in armyComponent.myMesh.Polygon.Vertices)
+		{
+			GL.Vertex(transform.TransformPoint(new Vector3(v.x + army.transform.position.x, v.y + army.transform.position.y, 0)));
+		}
+		var last = armyComponent.myPolygon.Vertices.First();
+		GL.Vertex(transform.TransformPoint(new Vector3(last.x + army.transform.position.x, last.y + army.transform.position.y, 0)));
+		GL.End();
 	}
 
 	private void DrawPolygon(Polygon2D p, Color c)

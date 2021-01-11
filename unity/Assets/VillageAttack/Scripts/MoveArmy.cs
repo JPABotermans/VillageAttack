@@ -14,7 +14,7 @@ public class MoveArmy : MonoBehaviour {
 	private Material m_LineMaterial;
 	public List<Vertex> path = new List<Vertex>();
 	private static float epsilon = 0.2f;
-	private Polygon2DMesh myMesh;
+	public Polygon2DMesh myMesh;
 	public Polygon2D myPolygon = new Polygon2D();
 
 	// Use this for initialization
