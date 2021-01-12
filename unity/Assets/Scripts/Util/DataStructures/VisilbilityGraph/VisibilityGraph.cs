@@ -18,6 +18,7 @@
         private LinkedList<Polygon2D> m_polygons;
         private LinkedList<Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?>> m_vertex_association_data;
         public AdjacencyListGraph g { get; private set; }
+
         public Vertex control_vertex;
         public Vertex village_vertex;
 
@@ -43,10 +44,10 @@
                 }
             }
             LinkedList<Edge> edges = new LinkedList<Edge>();
-            foreach(Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> origin in m_vertex_association_data)
+            foreach (Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> origin in m_vertex_association_data)
             {
-                LinkedList<Vertex> visible_vertices = this.NaiveVisibleVertices(origin.Item4);
-                foreach(Vertex target in visible_vertices)
+                LinkedList<Vertex> visible_vertices = this.VisibleVertices(origin);
+                foreach (Vertex target in visible_vertices)
                 {
                     float weight = (origin.Item1 - target.Pos).magnitude;
                     Edge e = new Edge(origin.Item4, target, weight);
@@ -136,7 +137,7 @@
             return status;
         }
 
-        public static bool HandleEvent(Tuple<Vector2, Vector2?, Vector2?, Vertex, float> Event, Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v,ref LineSegmentAATree status)
+        public bool HandleEvent(Tuple<Vector2, Vector2?, Vector2?, Vertex, float> Event, Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v,ref LineSegmentAATree status)
         {
             bool seg1InStatus;
             bool seg2InStatus;
@@ -175,6 +176,7 @@
                 {
                     status.Insert(seg2, Event.Item1);
                 }
+                
             }
             else
             {
@@ -188,6 +190,7 @@
                     visible = !DirectsInside(v.Item1, v.Item2, v.Item3, Event.Item1, v.Item5);
                 }
             }
+            
             return visible;
         }
 
@@ -201,54 +204,30 @@
             {
                 LineSegment seg1 = new LineSegment((Vector2)previous, p);
                 LineSegment seg2 = new LineSegment(p, (Vector2)next);
-                if((bool) clockwise != seg1.IsRightOf(query) || (bool) clockwise != seg2.IsRightOf(query) || seg1.Line.IsOnLine(query) || seg2.Line.IsOnLine(query))
+                if (ConvexAngle(p, (Vector2) previous, (Vector2) next, (bool)clockwise))
                 {
-                    return false;
+                    if ((bool)clockwise != seg1.IsRightOf(query) || (bool)clockwise != seg2.IsRightOf(query) || seg1.Line.IsOnLine(query) || seg2.Line.IsOnLine(query))
+                    {
+                        return false;
+                    }
                 }
+                else
+                {
+                    if (((bool)clockwise != seg1.IsRightOf(query) && (bool)clockwise != seg2.IsRightOf(query)) || seg1.Line.IsOnLine(query) || seg2.Line.IsOnLine(query))
+                    {
+                        return false;
+                    }
+                }
+                
                 return true;
             }
         }
 
-        private LinkedList<Vertex> NaiveVisibleVertices(Vertex v)
+        private static bool ConvexAngle(Vector2 p, Vector2 previous, Vector2 next, bool clockwise)
         {
-            LinkedList<Vertex> result = new LinkedList<Vertex>();
-            foreach (Vertex p in this.m_vertices)
-            {
-                if (this.NaiveIsVisible(v, p))
-                {
-                    result.AddLast(p);
-                }
-
-            }
-            return result;
-        }
-
-        private bool NaiveIsVisible(Vertex p, Vertex v)
-        {
-            if (p.Pos.Equals(v.Pos))
-            {
-                return false;
-            }
-            LineSegment seg = new LineSegment(p.Pos, v.Pos);
-            foreach (Polygon2D poly in this.m_polygons)
-            {
-                if (poly.OnBoundary(p.Pos) && poly.OnBoundary(v.Pos) && poly.Contains((v.Pos + p.Pos) / 2) && !(poly.OnBoundary((v.Pos + p.Pos) / 2)))
-                {
-                    return false;
-                }
-                foreach (LineSegment intersecting_segment in poly.Segments)
-                {
-                    Vector2? intersecting_point = seg.Intersect(intersecting_segment);
-                    if (intersecting_point != null)
-                    {
-                        if (!(intersecting_point == v.Pos || intersecting_point == p.Pos))
-                        {
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
+            LineSegment seg1 = new LineSegment(previous, p);
+            LineSegment seg2 = new LineSegment(p, next);
+            return seg1.IsRightOf(next) == clockwise;
         }
     }
 
