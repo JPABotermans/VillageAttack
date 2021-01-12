@@ -108,7 +108,18 @@
                     parent = currentNode;
                     comparisonResult = CompareTo(query_line, currentNode.Data, COMPARISON_TYPE.INSERT);
                     TraversalHistory histEntry;
-
+                    if (comparisonResult == 0)
+                    {
+                        var d1 = (data.Point1 - m_point).magnitude + (data.Point2 - m_point).magnitude;
+                        var d2 = (currentNode.Data.Point1 - m_point).magnitude + (currentNode.Data.Point2 - m_point).magnitude;
+                        if(d1 > d2)
+                        {
+                            comparisonResult = 1;
+                        }else if(d1 < d2)
+                        {
+                            comparisonResult = -1;
+                        }
+                    }
                     // switch between left or right
                     if (comparisonResult <= 0)
                     {
@@ -711,7 +722,8 @@
             }
             else
             {
-                if(intersection == a.Point1 || intersection == a.Point2)
+                Vector2 non_null_intersection = (Vector2)intersection;
+                if(a.IsEndpoint(non_null_intersection))
                 {
                     return 0;
                 }

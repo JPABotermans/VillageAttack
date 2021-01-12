@@ -1,19 +1,16 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.EventSystems;
 using UnityEngine;
 using Util.Geometry.Graph;
 using Util.Geometry.Polygon;
-using General.UI;
-using General.Model;
 using Util.Geometry.Contour;
 using UnityEngine.Assertions;
 using Util.Geometry;
 using System.Linq;
 using Util.Algorithms.Polygon;
 using Util.VisibilityGraph;
-using Util.Geometry.Graph;
 using UnityEngine.SceneManagement;
+<<<<<<< HEAD
 using UnityEngine.UI;
 using System.IO;
 using System.Timers;
@@ -21,6 +18,8 @@ using System.Diagnostics;
 using System.Threading;
 using System;
 using Debug = UnityEngine.Debug;
+=======
+>>>>>>> 6f8c127df2d5801003fea6a4da0be0a2ce380a54
 
 
 public class SceneController : MonoBehaviour {
@@ -35,11 +34,13 @@ public class SceneController : MonoBehaviour {
 	private int _current_prefab = 1;
 	public List<PolyMountain> wd = new List<PolyMountain>();
 	private ContourPolygon contourPoly = new ContourPolygon();
+	private ContourPolygon preMinkowskiPoly = new ContourPolygon();
 	private LinkedList<Polygon2D> polygons_linked_list = new LinkedList<Polygon2D>();
 	private Material m_LineMaterial;
+	private bool drawPreMinkowskiContour = true;
 	private bool drawContour = false;
 	private bool drawPolygon = false;
-	private bool drawVisibilityGraph = true;
+	private bool drawVisibilityGraph = false;
 
 	public Color highlightcolor = Color.cyan;
 
@@ -51,17 +52,7 @@ public class SceneController : MonoBehaviour {
 	private float secondsCounted;
 	
 	private bool _army_moving = false;
-	// private IEnumerator UpdateTime(){
-	// 	if (_army_moving){
-	// 	secondsCounted -= (int) Time.deltaTime;
-	// 	TimeText.text = "Seconds left " + secondsCounted ;
 
-	// 	}
-	// 	else {
-	// 		TimeText.text = "Seconds left: 60 " ;
-	// 	}
-	// }
-	// Use this for initialization
 	void Start () {
 		secondsCounted = 30;
 		Debug.Log("The sprite" + mountainSprites[_current_prefab]);
@@ -85,8 +76,6 @@ public class SceneController : MonoBehaviour {
 
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
 
-		/*Debug.Log("The control point " + armyComponent.transform.position);
-		Debug.Log("The village point " + village.transform.position);*/
 		polygons_linked_list = new LinkedList<Polygon2D>();
 
 		foreach(Contour contour in contourPoly.Contours )
@@ -211,7 +200,8 @@ public class SceneController : MonoBehaviour {
 			foreach (Vector2 v in mountain_script.myPolygon.Vertices){
 				c.AddVertex(new Vector2D(v.x, v.y));
 			}
-			MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }));
+			preMinkowskiPoly = MergeContours(new ContourPolygon(new List<Contour> { c }), preMinkowskiPoly);
+			contourPoly = MergeContours(new ContourPolygon(new List<Contour>{ MinkowskiSum(c) }), contourPoly);
 
 			// SearchPath();
 		}
@@ -247,6 +237,7 @@ public class SceneController : MonoBehaviour {
 		return path;
     }
 
+<<<<<<< HEAD
 	private Vertex MinValue(Dictionary<Vertex, float> distances ){
 		float min_distance = 10000.0f;
 		Vertex best_vertex = distances.First().Key;
@@ -324,12 +315,15 @@ public class SceneController : MonoBehaviour {
 
 
 	private void MergeContours(ContourPolygon newContour)
+=======
+	private ContourPolygon MergeContours(ContourPolygon newContour, ContourPolygon oldContour)
+>>>>>>> 6f8c127df2d5801003fea6a4da0be0a2ce380a54
     {
 		if (contourPoly.Contours.Count != 0)
 		{
-			var martinez = new Martinez(contourPoly, newContour, Martinez.OperationType.Union);
-			contourPoly = martinez.Run();
-			foreach (Contour c in contourPoly.Contours) {
+			var martinez = new Martinez(oldContour, newContour, Martinez.OperationType.Union);
+			return martinez.Run();
+			foreach (Contour c in oldContour.Contours) {
 				foreach(Vector2D v in c.Vertices)
                 {
 					foreach(Vector2D v2 in c.Vertices)
@@ -343,7 +337,7 @@ public class SceneController : MonoBehaviour {
                 }
             }
 		} else {
-			contourPoly = newContour;
+			return newContour;
 		}
 	}
 
@@ -384,10 +378,8 @@ public class SceneController : MonoBehaviour {
 		List<Vector2> sumVertices = new List<Vector2>();
 		foreach (Vector2 v in armyComponent.myPolygon.Vertices)
         {
-			// Debug.Log("Hallo from Mikowski sum, this is an army component: "+ v);
 			foreach (Vector2D v2 in oldContour.Vertices)
             {
-				// Debug.Log("Hallo from Mikowski sum, this is an contour component: "+ v2);
 				sumVertices.Add(new Vector2(v.x + (float)v2.x, v.y + (float)v2.y));
             }
         }
@@ -403,6 +395,15 @@ public class SceneController : MonoBehaviour {
 	{
 		// Apply the line material
 		m_LineMaterial.SetPass(0);
+
+		if (drawPreMinkowskiContour)
+        {
+			foreach (Contour c in preMinkowskiPoly.Contours)
+			{
+				DrawContour(c);
+			}
+		}
+
 		if (drawContour) {
 			foreach (Contour c in contourPoly.Contours)
 			{
@@ -423,6 +424,8 @@ public class SceneController : MonoBehaviour {
 		if (contains_visibility_graph && drawVisibilityGraph){
 			DrawVisibilityGraph();
 		}
+
+		DrawHintPolygon();
 	}
 
 	private void DrawContour(Contour c)
@@ -442,6 +445,41 @@ public class SceneController : MonoBehaviour {
 		}
 		var last = c.Vertices.First();
 		GL.Vertex(new Vector3((float)last.x, (float)last.y, 0));
+		GL.End();
+	}
+
+	private void DrawHintPolygon()
+    {
+		GL.Begin(GL.LINE_STRIP);
+		GL.Color(Color.blue);
+		Vector3 pos = Input.mousePosition;
+		Vector3 pos_world = Camera.main.ScreenToWorldPoint(
+					new Vector3(Input.mousePosition.x,
+					Input.mousePosition.y,
+					Camera.main.nearClipPlane)
+					);
+		MountainBehaviour b = MountainPrefabs[this._current_prefab].GetComponent<MountainBehaviour>();
+
+		// Draw the polygon on the position where mountain will be placed
+		// using the scaling of the selected mountain
+		Debug.Log(b.scale.ToString());
+		GL.Vertex(new Vector3(pos_world.x - 0.5f*b.scale[0], pos_world.y - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x, pos_world.y + b.scale[1] - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x + b.scale[0], pos_world.y - 0.5f, 0));
+		GL.Vertex(new Vector3(pos_world.x - 0.5f * b.scale[0], pos_world.y - 0.5f, 0));
+		GL.End();
+
+		// Draw player polygon
+		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
+
+		GL.Begin(GL.LINE_STRIP);
+		foreach (Vector2 v in armyComponent.myMesh.Polygon.Vertices)
+		{
+			GL.Vertex(transform.TransformPoint(new Vector3(v.x + army.transform.position.x, v.y + army.transform.position.y, 0)));
+		}
+		var last = armyComponent.myPolygon.Vertices.First();
+		GL.Vertex(transform.TransformPoint(new Vector3(last.x + army.transform.position.x, last.y + army.transform.position.y, 0)));
 		GL.End();
 	}
 

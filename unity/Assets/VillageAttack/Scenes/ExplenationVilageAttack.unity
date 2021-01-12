@@ -278,7 +278,7 @@ MonoBehaviour:
     m_LineSpacing: 1
   m_Text: An evil army of bandits wants to loot your village. However, you are a mighty
     wizzard that can conjur mountains. Can you delay the bandits long enough such
-    that the villager can get to safety?
+    that the villagers can get to safety?
 --- !u!222 &619343539
 CanvasRenderer:
   m_ObjectHideFlags: 0
