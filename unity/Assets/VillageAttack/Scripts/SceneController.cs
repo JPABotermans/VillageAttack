@@ -24,6 +24,7 @@ public class SceneController : MonoBehaviour {
 	[SerializeField] public GameObject[] buttons;
 
 	[SerializeField] public GameObject village;
+	public GameObject army = null;
 	[SerializeField] public SpriteRenderer[] mountainSprites;
 	[SerializeField] private TextMesh TimeText;
 	
@@ -68,7 +69,7 @@ public class SceneController : MonoBehaviour {
 
 	public void SearchPath(){
 		_army_moving = true;
-		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		army = GameObject.FindGameObjectsWithTag("Player")[0];
 		village = GameObject.FindGameObjectsWithTag("Finish")[0];
 
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
@@ -183,9 +184,12 @@ public class SceneController : MonoBehaviour {
 
 	private void CreateMountain(Vector3 worldPosition)
     {
-		// Debug.Log("We are clicking somewhere" + worldPosition);
-
-		if ((worldPosition[0] > -15) && (worldPosition[0] < 20))
+		// Mountain is placed only if it is nog too close to the village & army
+		// and if it is in the map bounds
+		Vector2 mouseWorldPos = new Vector2(worldPosition.x, worldPosition.y);
+		bool tooCloseToVillage = village != null && Vector2.Distance(village.transform.position, mouseWorldPos) <= 4f;
+		bool tooCloseToArmy = army != null && Vector2.Distance(army.transform.position, mouseWorldPos) <= 4f;
+		if ((worldPosition[0] > -15) && (worldPosition[0] < 20) && village != null && !tooCloseToArmy && !tooCloseToVillage)
 		{
 			// Instantiate the mountain prefab
 			Contour c = new Contour();
@@ -443,14 +447,25 @@ public class SceneController : MonoBehaviour {
 
 	private void DrawHintPolygon()
     {
-		GL.Begin(GL.LINE_STRIP);
-		GL.Color(Color.blue);
 		Vector3 pos = Input.mousePosition;
 		Vector3 pos_world = Camera.main.ScreenToWorldPoint(
 					new Vector3(Input.mousePosition.x,
 					Input.mousePosition.y,
 					Camera.main.nearClipPlane)
 					);
+
+
+		GL.Begin(GL.LINE_STRIP);
+
+		bool tooCloseToVillage = village != null && Vector2.Distance(village.transform.position, pos_world) <= 4f;
+		bool tooCloseToArmy = army != null && Vector2.Distance(army.transform.position, pos_world) <= 4f;
+		if (tooCloseToArmy || tooCloseToVillage)
+		{
+			GL.Color(Color.red);
+		} else { 
+			GL.Color(Color.blue);
+		}
+		
 		MountainBehaviour b = MountainPrefabs[this._current_prefab].GetComponent<MountainBehaviour>();
 
 		// Draw the polygon on the position where mountain will be placed
@@ -463,7 +478,7 @@ public class SceneController : MonoBehaviour {
 		GL.End();
 
 		// Draw player polygon
-		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
+		army = GameObject.FindGameObjectsWithTag("Player")[0];
 		MoveArmy armyComponent = army.GetComponent<MoveArmy>();
 
 		GL.Begin(GL.LINE_STRIP);
