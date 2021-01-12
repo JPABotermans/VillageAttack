@@ -10,7 +10,6 @@ using System.Linq;
 using Util.Algorithms.Polygon;
 using Util.VisibilityGraph;
 using UnityEngine.SceneManagement;
-<<<<<<< HEAD
 using UnityEngine.UI;
 using System.IO;
 using System.Timers;
@@ -18,8 +17,6 @@ using System.Diagnostics;
 using System.Threading;
 using System;
 using Debug = UnityEngine.Debug;
-=======
->>>>>>> 6f8c127df2d5801003fea6a4da0be0a2ce380a54
 
 
 public class SceneController : MonoBehaviour {
@@ -237,7 +234,6 @@ public class SceneController : MonoBehaviour {
 		return path;
     }
 
-<<<<<<< HEAD
 	private Vertex MinValue(Dictionary<Vertex, float> distances ){
 		float min_distance = 10000.0f;
 		Vertex best_vertex = distances.First().Key;
@@ -314,10 +310,7 @@ public class SceneController : MonoBehaviour {
     }
 
 
-	private void MergeContours(ContourPolygon newContour)
-=======
 	private ContourPolygon MergeContours(ContourPolygon newContour, ContourPolygon oldContour)
->>>>>>> 6f8c127df2d5801003fea6a4da0be0a2ce380a54
     {
 		if (contourPoly.Contours.Count != 0)
 		{
