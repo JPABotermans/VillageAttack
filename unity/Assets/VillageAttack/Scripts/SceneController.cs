@@ -15,6 +15,12 @@ using Util.VisibilityGraph;
 using Util.Geometry.Graph;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using System.IO;
+using System.Timers;
+using System.Diagnostics;
+using System.Threading;
+using System;
+using Debug = UnityEngine.Debug;
 
 
 public class SceneController : MonoBehaviour {
@@ -73,9 +79,6 @@ public class SceneController : MonoBehaviour {
 	}
 
 	public void SearchPath(){
-		/*Debug.Log("Start Searching.");
-		Debug.Log("The countour polygon "+ contourPoly);
-		Debug.Log("The countour polygon Contours "+ contourPoly.Contours);*/
 		_army_moving = true;
 		GameObject army = GameObject.FindGameObjectsWithTag("Player")[0];
 		village = GameObject.FindGameObjectsWithTag("Finish")[0];
@@ -127,7 +130,21 @@ public class SceneController : MonoBehaviour {
 		Vector2 village_point = new Vector2(village.transform.position[0], village.transform.position[1]);
 		visibility_graph = new VisibilityGraph(polygons_linked_list, control_point , village_point);
 
+		Stopwatch stopWatch = new Stopwatch();
+        stopWatch.Start();
 		NewPath(BFS(visibility_graph.g, visibility_graph.control_vertex, visibility_graph.village_vertex));
+        stopWatch.Stop();
+        // Get the elapsed time as a TimeSpan value.
+        TimeSpan ts = stopWatch.Elapsed;
+		Debug.Log("BFS took " + ts);
+		stopWatch.Start();
+		NewPath(DijkstrasAlgorithm(visibility_graph.g, visibility_graph.control_vertex, visibility_graph.village_vertex));
+        stopWatch.Stop();
+        // Get the elapsed time as a TimeSpan value.
+        ts = stopWatch.Elapsed;
+		Debug.Log("Dijkstas algortihm took " + ts);
+
+		
 
 		contains_visibility_graph = true;
 	}
@@ -229,6 +246,82 @@ public class SceneController : MonoBehaviour {
 		Debug.Log("Could not find any path to the village.");
 		return path;
     }
+
+	private Vertex MinValue(Dictionary<Vertex, float> distances ){
+		float min_distance = 10000.0f;
+		Vertex best_vertex = distances.First().Key;
+		foreach(KeyValuePair<Vertex, float> entry in distances){
+			if (min_distance > entry.Value)
+			{
+				best_vertex = entry.Key;
+				min_distance = entry.Value;
+			}
+		}
+		return best_vertex;
+	}
+
+	
+	private List<Vertex> ReversePath(Dictionary<Vertex, Vertex> previous_dict, Vertex end_vertex){
+		List<Vertex> path = new List<Vertex>();
+		path.Add(end_vertex);
+
+		while (previous_dict.ContainsKey(end_vertex)){
+			end_vertex = previous_dict[end_vertex];
+			path.Add(end_vertex);
+		}
+		path.Add(end_vertex);
+		path.Reverse();
+		return path;
+	}
+	
+	private List<Vertex> DijkstrasAlgorithm(AdjacencyListGraph g, Vertex root, Vertex goal)
+    {
+		//Use dictonary as priority queue (yes hacky)...
+		Dictionary<Vertex, float> queue = new Dictionary<Vertex, float>(); 
+		Dictionary<Vertex, Vertex> previous = new Dictionary<Vertex, Vertex>();
+
+		// Use list for mainting all handled vertices (yes, even more hacky)
+		List<Vertex> handled_vertices = new List<Vertex>();
+		
+		queue.Remove(root);
+		queue.Add(root, 0.0f);
+
+		while (queue.Count != 0)
+        {
+			Vertex _vertex = MinValue(queue);
+
+			if (object.ReferenceEquals(_vertex, goal))
+            {
+				Debug.Log("Found GOAL VERTEX!");
+				return ReversePath(previous, _vertex);
+            }
+			foreach (Edge e in g.EdgesOf(_vertex))
+            {
+
+				Vertex v2 = object.ReferenceEquals(_vertex, e.Start) ? e.End : e.Start;
+				if (!handled_vertices.Contains(v2)){
+					float temp_distance = queue[_vertex] + (new Vector2( _vertex.Pos.x, _vertex.Pos.y) - new Vector2(v2.Pos.x, v2.Pos.y)).magnitude;
+					if (!queue.ContainsKey(v2)){
+						queue.Add(v2, 1000.0f);
+					}
+					if (temp_distance < queue[v2]) {
+						queue.Remove(v2);
+						queue.Add(v2, temp_distance);
+						if (previous.ContainsKey(v2)){
+							previous.Remove(v2);
+						}
+						previous.Add(v2, _vertex);
+					}
+				}
+			}
+			queue.Remove(_vertex);
+			handled_vertices.Add(_vertex);
+        }
+
+		Debug.Log("Could not find any path to the goal, we are using BFS.");
+		return BFS(g, root, goal);
+    }
+
 
 	private void MergeContours(ContourPolygon newContour)
     {
