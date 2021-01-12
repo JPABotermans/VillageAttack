@@ -159,14 +159,15 @@
                 }
                 status.FindMin(out VisibleSegment);
                 bool directsinside = DirectsInside(v.Item1, v.Item2, v.Item3, Event.Item1, v.Item5);
+                bool endpoint_directsinside = DirectsInside(Event.Item1, Event.Item2, Event.Item3, v.Item1, Event.Item4);
                 if (VisibleSegment != null)
                 {
                     bool no_intersects = VisibleSegment.Intersect(new LineSegment(v.Item1, Event.Item1)) == null;
-                    visible = !directsinside && no_intersects && (!DirectsInside(Event.Item1, Event.Item2, Event.Item3, v.Item1, Event.Item4));
+                    visible = !directsinside && no_intersects && (!endpoint_directsinside);
                 }
                 else
                 {
-                    visible = (!directsinside) && (!DirectsInside(Event.Item1, Event.Item2, Event.Item3, v.Item1, Event.Item4));
+                    visible = (!directsinside) && (!endpoint_directsinside);
                 }
                 if (!seg1InStatus && !seg1.IsOnSegment(v.Item1))
                 {
