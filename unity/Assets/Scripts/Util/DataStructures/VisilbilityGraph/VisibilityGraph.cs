@@ -61,15 +61,15 @@
         {
             LinkedList<Vertex> result = new LinkedList<Vertex>();
 
-            BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, Vertex, float>> queue = InitializeEventQueue(v);
+            BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, bool?, float>> queue = InitializeEventQueue(v);
             LineSegmentAATree status = InitializeStatus(v);
 
             while (queue.Count > 0){
-                Tuple<Vector2, Vector2?, Vector2?, Vertex, float> Event = queue.Pop();
+                Tuple<Vector2, Vector2?, Vector2?, bool?, float> Event = queue.Pop();
                 bool visible = HandleEvent(Event, v, ref status);
                 if (visible)
                 {
-                    result.AddLast(Event.Item4);
+                    result.AddLast(new Vertex(Event.Item1));
                 }
             }
             return result;
@@ -91,14 +91,14 @@
             }
         }
 
-        public BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, Vertex, float>> InitializeEventQueue(Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v)
+        public BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, bool?, float>> InitializeEventQueue(Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v)
         {
-            var queue = new BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, Vertex, float>>(new TupleComparer(v.Item1));
+            var queue = new BinaryHeap<Tuple<Vector2, Vector2?, Vector2?, bool?, float>>(new TupleComparer(v.Item1));
             foreach (Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> p in m_vertex_association_data)
             {
                 if (!(p.Item1 == v.Item1))
                 {
-                    queue.Push(new Tuple<Vector2, Vector2?, Vector2?, Vertex, float>(p.Item1, p.Item2, p.Item3, p.Item4, GetAngle(v.Item4, p.Item4)));
+                    queue.Push(new Tuple<Vector2, Vector2?, Vector2?, bool?, float>(p.Item1, p.Item2, p.Item3, p.Item5, GetAngle(v.Item4, p.Item4)));
                 }
             }
             return queue;
@@ -137,7 +137,7 @@
             return status;
         }
 
-        public bool HandleEvent(Tuple<Vector2, Vector2?, Vector2?, Vertex, float> Event, Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v,ref LineSegmentAATree status)
+        public bool HandleEvent(Tuple<Vector2, Vector2?, Vector2?, bool?, float> Event, Tuple<Vector2, Vector2?, Vector2?, Vertex, bool?> v,ref LineSegmentAATree status)
         {
             bool seg1InStatus;
             bool seg2InStatus;
@@ -162,11 +162,11 @@
                 if (VisibleSegment != null)
                 {
                     bool no_intersects = VisibleSegment.Intersect(new LineSegment(v.Item1, Event.Item1)) == null;
-                    visible = !directsinside && no_intersects;
+                    visible = !directsinside && no_intersects && (!DirectsInside(Event.Item1, Event.Item2, Event.Item3, v.Item1, Event.Item4));
                 }
                 else
                 {
-                    visible = !directsinside;
+                    visible = (!directsinside) && (!DirectsInside(Event.Item1, Event.Item2, Event.Item3, v.Item1, Event.Item4));
                 }
                 if (!seg1InStatus && !seg1.IsOnSegment(v.Item1))
                 {
@@ -251,7 +251,7 @@
 
     }
 
-    public class TupleComparer : IComparer<Tuple<Vector2, Vector2?, Vector2?, Vertex, float>>
+    public class TupleComparer : IComparer<Tuple<Vector2, Vector2?, Vector2?, bool?, float>>
     {
         Vector2 m_point;
 
@@ -259,7 +259,7 @@
         {
             m_point = orientation_point;
         }
-        public int Compare(Tuple<Vector2, Vector2?, Vector2?, Vertex, float> x, Tuple<Vector2, Vector2?, Vector2?, Vertex, float> y)
+        public int Compare(Tuple<Vector2, Vector2?, Vector2?, bool?, float> x, Tuple<Vector2, Vector2?, Vector2?, bool?, float> y)
         {
             if (x.Item5 == y.Item5)
             { 
