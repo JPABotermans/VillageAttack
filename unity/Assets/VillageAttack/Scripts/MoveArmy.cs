@@ -7,14 +7,14 @@ using Util.Geometry.Polygon;
 
 public class MoveArmy : MonoBehaviour {
 
-	private Vector2 speed = new Vector2(3f, 3f);
+	private Vector2 speed = new Vector2(1.5f, 1.5f);
 	private Vector3 startPos = new Vector3(-11f, -3.5f, -10f);
 	private Rigidbody2D _body;
 	private BoxCollider2D _box;
 	private Material m_LineMaterial;
 	public List<Vertex> path = new List<Vertex>();
-	private static float epsilon = 0.5f;
-	private Polygon2DMesh myMesh;
+	private static float epsilon = 0.2f;
+	public Polygon2DMesh myMesh;
 	public Polygon2D myPolygon = new Polygon2D();
 
 	// Use this for initialization
@@ -25,7 +25,8 @@ public class MoveArmy : MonoBehaviour {
 		//initialize the polygon and its mesh
 		Polygon2D polygon = new Polygon2D();
 		polygon.AddVertex(new Vector2(-1, -1));
-		polygon.AddVertex(new Vector2(0, 2));
+		polygon.AddVertex(new Vector2(-1, 1));
+		polygon.AddVertex(new Vector2(1, 1));
 		polygon.AddVertex(new Vector2(1, -1));
 		myMesh = gameObject.GetComponent<Polygon2DMesh>();
 		myMesh.Polygon = polygon;
@@ -71,12 +72,6 @@ public class MoveArmy : MonoBehaviour {
 		_body.velocity = movement;
 
 		DrawPath();
-		// Debug.Log(village_collision);
-		// if (village_collision != null){
-
-		// 	Debug.Log("we have won");
-		// }
-		// // Debug.Log("We are moving to " + startPos);dw
 
 	}
 
@@ -91,7 +86,7 @@ public class MoveArmy : MonoBehaviour {
     {
 		if (path.Count == 0) return;
 		GL.Begin(GL.LINE_STRIP);
-		GL.Color(Color.red);
+		GL.Color(Color.white);
 		GL.Vertex(_body.transform.position);
 		foreach (Vertex v in path)
         {
